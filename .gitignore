@@ -1,0 +1,6 @@
+*.ini
+
+logs/
+models/
+.ipynb_checkpoints/
+__pycache__/
