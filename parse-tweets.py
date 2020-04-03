@@ -34,7 +34,7 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--files', type=str, nargs="+", required=True, dest="files",
-                        help='give a list of file name, e.g., -c file1.json file2.json, ...')
+                        help='give a list of file name, e.g., -f file1.json file2.json, ...')
     parser.add_argument('-c', '--collection', type=str, required=True, dest="collection",
                         help='give a collection name, e.g., -c Collection1')
     args = parser.parse_args()
