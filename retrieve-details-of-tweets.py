@@ -3,14 +3,34 @@ import re
 import string
 import configparser
 import argparse
+import time
 
 import tweepy
 
-from pymongo import MongoClient
+from multiprocessing import Pool
+from pymongo import MongoClient, UpdateOne
 from datetime import datetime
 from nltk.corpus import stopwords
 from math import ceil
 
+class Timer():
+    def __init__(self):
+        """ Return Elapsed Time
+        This is a helper class for measuring the elapsed time 
+        for a code block.
+
+        Example:
+            with Timer():
+                do_something()
+        """
+        pass
+    def __enter__(self):
+        self.start = time.time()
+        return None
+    def __exit__(self, type, value, traceback):
+        elapsed_time = time.time() - self.start
+        print("Elasped Time: {}".format(time.strftime("%H:%M:%S", time.gmtime(elapsed_time))))
+ 
 def get_collection_cursor(collection):
     client = MongoClient(uri)
     return client[MongoDB][collection]
@@ -46,6 +66,8 @@ def preprocess(s):
 
 def parse(tweet):
 
+    tweet = tweet._json
+
     hashtags = []
     if len(tweet["entities"]) > 0:
         hashtags = [tag["text"] for tag in tweet["entities"]["hashtags"]]
@@ -54,10 +76,9 @@ def parse(tweet):
         tokens = preprocess(tweet["full_text"])
     except KeyError:
         print(tweet)
-
-    # update_to_mongo
-    target_collection.update_one({"id_str": tweet["id_str"]},
-                    {
+    
+    return UpdateOne(filter={"id_str": tweet["id_str"]},\
+                    update={
                         "$set":{
                             "hashtags": hashtags,
                             "text": tweet["full_text"],
@@ -67,17 +88,37 @@ def parse(tweet):
 
 def lookup_tweets(tweet_IDs, api):
     tweet_count = len(tweet_IDs)
+    pool = Pool(6)
     try:
+        # initial the list for storing updates
+        operations = []
         for i in range(ceil(tweet_count / 100)):
             # Catch the last group if it is less than 100 tweets
             end_loc = min((i + 1) * 100, tweet_count)
             
             rs = api.statuses_lookup(id_=tweet_IDs[i * 100:end_loc], tweet_mode="extended")
-            for r in rs:
-                parse(r._json)
             
+            if len(rs) != 0:
+                with Timer():
+                    operations += list(pool.imap_unordered(parse, rs))
+                print("Has processed {} tweets".format(len(rs)))
+
             if i % 10 == 0:
-                print("{}: ({}/{}) tweets have processed.".format(collection_name, str(i*100), str(tweet_count)))
+                
+                # if there has any update
+                if len(operations) != 0:
+                    with Timer():
+                        target_collection.bulk_write(operations)
+                    print("Has updated {} tweets in MongoDB".format(len(operations)))
+                    # clear operations
+                    operations = []
+
+                print("{}: ({}/{}) tweets have scanned.".format(collection_name, str(i*100),\
+                     str(tweet_count)))
+
+        # write the all last bulk of updates
+        if len(operations) != 0:
+            target_collection.bulk_write(operations)
 
     except tweepy.TweepError:
         print('Something went wrong, quitting...')
