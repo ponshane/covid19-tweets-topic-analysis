@@ -2,6 +2,7 @@ import re
 import tqdm
 import pandas as pd
 import matplotlib.pyplot as plt
+from math import log
 
 def make_perplexity_plots(log_path, output_path):
     # https://stackoverflow.com/questions/37570696/how-to-monitor-convergence-of-gensim-lda-model
@@ -105,3 +106,43 @@ def export_dtm(nmf, corpus, out_path, stop_at=None):
         pbar.update(1)
     pbar.close()
     wf.close()
+    
+def _relevance(word_contribution, word_prob, _lambda):
+    """ calculate relevance score
+    
+    Args:
+        word_contribution (float): p(word|topic)
+        word_prob (float): p(word)
+        _lambda (float): the threshold to penalize high frequency word
+    Return 
+        float: relevance score
+    """
+    if word_contribution < 1e-8:
+        word_contribution = 1e-8
+    return _lambda * log(word_contribution) + (1-_lambda)*log(word_contribution/word_prob)
+
+def rerank_topic_words_by_relevance(model, word_cnt, _lambda):
+    """ rerank the topic words by relevance score
+    
+    Args:
+        model (gensim.models.nmf.Nmf instance):
+        word_cnt (collections.Counter instance):
+        _lambda (float): the threshold to penalize high frequency word
+    Return:
+        dict: {topicId: [(word1, rel1), ...]}
+    """
+    # total word frequency
+    N = sum(word_cnt.values())
+    # number of topics
+    num_topic = model.get_topics().shape[0]
+    rerank_topic_words = dict()
+    for topic_idx in range(num_topic):
+        # select all word contribution from a topic
+        origina_word_rank = model.show_topic(topicid=topic_idx,topn=len(word_cnt), normalize=True)
+        # calculate the relevance score of each topic
+        # value == p(word|topic) == word_contribution
+        # p(w) is estimated by empirical distribution: word_cnt[model.id2word.token2id[word]]/N
+        rerank_word_rank = [(word,_relevance(value, (word_cnt[model.id2word.token2id[word]]/N), _lambda))
+                            for word, value in origina_word_rank]
+        rerank_topic_words[topic_idx] = sorted(rerank_word_rank, key=lambda x: x[1], reverse=True)
+    return rerank_topic_words
