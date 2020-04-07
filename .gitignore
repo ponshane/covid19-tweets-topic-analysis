@@ -5,3 +5,4 @@ models/
 .ipynb_checkpoints/
 __pycache__/
 corpora/
+.vscode/
