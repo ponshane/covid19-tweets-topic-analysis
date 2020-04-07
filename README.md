@@ -29,6 +29,10 @@
     ```bash
     python inference-nmf-dtm.py -n 25 -f Whole-March-Tweets
     ```
+4. (Optional) Export the topic summary, including topic_ratio and top representative words
+    ```
+    python export-nmf-model-summary.py -n 25 -f Whole-March-Tweets
+    ```
 
 # Reference
 - Zhao, R., & Tan, V. Y. (2016). Online nonnegative matrix factorization with outliers. IEEE Transactions on Signal Processing, 65(3), 555-570.

@@ -115,7 +115,7 @@ def _relevance(word_contribution, word_prob, _lambda):
         word_prob (float): p(word)
         _lambda (float): the threshold to penalize high frequency word
     Return 
-        float: relevance score
+        (float): relevance score
     """
     if word_contribution < 1e-8:
         word_contribution = 1e-8
@@ -129,7 +129,7 @@ def rerank_topic_words_by_relevance(model, word_cnt, _lambda):
         word_cnt (collections.Counter instance):
         _lambda (float): the threshold to penalize high frequency word
     Return:
-        dict: {topicId: [(word1, rel1), ...]}
+        (dict): {topicId: [(word1, rel1), ...]}
     """
     # total word frequency
     N = sum(word_cnt.values())
@@ -146,3 +146,33 @@ def rerank_topic_words_by_relevance(model, word_cnt, _lambda):
                             for word, value in origina_word_rank]
         rerank_topic_words[topic_idx] = sorted(rerank_word_rank, key=lambda x: x[1], reverse=True)
     return rerank_topic_words
+
+def dtm_csv_to_pd_df(dtm_csv_file):
+    """ read dtm csv and transform to pandas.Dataframe 
+    
+    Args:
+        dtm_csv_file (str): filename of csv file
+    Return:
+        (pandas.Dataframe): with shape(num_doc, num_topic)
+    """
+    dtm = pd.read_csv(dtm_csv_file)
+    # Reorient from long to wide
+    dtm = dtm.pivot(index='position_index', columns='topic_id',\
+                   values='topic_weight').fillna(0)
+    # Normalize each row as a valid probability distribution
+    dtm = dtm.div(dtm.sum(axis=1), axis=0)
+    return dtm
+
+def calculate_topic_ratios(dtm):
+    """ calculate topic ratios
+    
+    Args:
+        dtm (pandas.Dataframe):  with shape(num_doc, num_topic)
+    Return:
+        (dict): {"topic_idx":"XX.XX%", ...}
+    """
+    N = dtm.shape[0]
+    topic_ratios = dict()
+    for topic_idx in range(dtm.shape[1]):
+        topic_ratios[topic_idx] = "{:.2%}".format(sum(dtm[topic_idx]) / N)
+    return topic_ratios
