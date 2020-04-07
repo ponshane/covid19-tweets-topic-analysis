@@ -6,16 +6,19 @@ from codebase.topic_utilities import export_dtm
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--corpus', type=str, required=True,\
-                        dest="corpus",help='give a corpus path')
-    parser.add_argument('-m', '--model', type=str, required=True, dest="model",
-                        help='give a nmf model path')
-    parser.add_argument('-o', '--out_path', type=str, required=True, dest="out_path",
-                        help='give a path+file_name.csv for output file')
+    parser.add_argument('-n', '--num_topics', type=int, required=True, dest="num_topics",
+                        help='num of topics is a necessary to choose the right NMF model')
+    parser.add_argument('-f', '--fileTag', type=str, required=True, dest="fileTag",
+                        help='fileTag as prefix for all exported files')
     args = parser.parse_args()
     
-    tfidf_corpus = MmCorpus(args.corpus)
-    nmf = Nmf.load(args.model)
+    corpora_path = "./corpora/"
+    model_path = "./models/"
+    model_suffix = "-{}topics".format(args.num_topics)
+    fileTag = args.fileTag
+    
+    tfidf_corpus = MmCorpus('{}{}-tf-idf.mm'.format(corpora_path,fileTag))
+    nmf = Nmf.load("{}{}{}.model".format(model_path,fileTag,model_suffix))
     export_dtm(nmf=nmf, corpus=tfidf_corpus,\
-           out_path=args.out_path,\
+           out_path="{}{}{}-dtm.csv".format(model_path, fileTag, model_suffix),\
           stop_at=None)
