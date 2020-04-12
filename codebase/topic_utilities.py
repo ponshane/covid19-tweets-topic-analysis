@@ -119,7 +119,10 @@ def _relevance(word_contribution, word_prob, _lambda):
     """
     if word_contribution < 1e-8:
         word_contribution = 1e-8
-    return _lambda * log(word_contribution) + (1-_lambda)*log(word_contribution/word_prob)
+    if word_prob > 0:
+        return _lambda * log(word_contribution) + (1-_lambda)*log(word_contribution/word_prob)
+    else:
+        return -100
 
 def rerank_topic_words_by_relevance(model, word_cnt, _lambda):
     """ rerank the topic words by relevance score
