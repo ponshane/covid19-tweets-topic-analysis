@@ -1,6 +1,7 @@
 import re
 import tqdm
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from math import log
 
@@ -179,3 +180,61 @@ def calculate_topic_ratios(dtm):
     for topic_idx in range(dtm.shape[1]):
         topic_ratios[topic_idx] = "{:.2%}".format(sum(dtm[topic_idx]) / N)
     return topic_ratios
+
+def jaccard_similarity(list1, list2):
+    """calculate jaccard index between two lists
+
+    Arguments:
+        list1 {str,list} -- string where each word is split by SEP, or list of words
+        list2 {str,list} -- same as list1
+
+    Raises:
+        TypeError: only accept str or list as input
+
+    Returns:
+        float -- jaccard index between two word lists
+    """
+    if type(list1) == str and type(list2) == str:
+        list1 = list1.split(" ")
+        list2 = list2.split(" ")
+    elif type(list1) != list and type(list2) != list:
+        raise TypeError
+    
+    s1 = set(list1)
+    s2 = set(list2)
+    
+    return len(s1.intersection(s2)) / len(s1.union(s2))
+
+def calculate_jaccard_matrix_between_models(dict1, dict2):
+    """ calculate jaccard matrix between two sets of topics
+
+    Arguments:
+        dict1 {dict} -- where key is topic_index of model1, and value is a list of topic words (or string)
+        dict2 {dict} -- same as dict1, but for model1
+
+    Returns:
+        np.array -- matrix with shape(num_topics_of_model1, num_topics_of_model2)
+    """
+    jaccard_matrix = list()
+    
+    for i in range(len(dict1)):
+        i_words = dict1[i]
+        each_row = []
+        for j in range(len(dict2)):
+            j_words = dict2[j]
+            each_row.append(jaccard_similarity(i_words, j_words))
+        # when complete each row, then append back to matrix
+        jaccard_matrix.append(np.asarray(each_row))
+        
+    return np.vstack(jaccard_matrix)
+
+def pick_similar_topic_from_past(jaccard_matrix):
+    """ select the most similar topic from model1, given each topic of model2 as query  
+
+    Arguments:
+        jaccard_matrix {np.array} -- matrix with shape(num_topics_of_model1, num_topics_of_model2)
+    """
+    for idx in range(jaccard_matrix.shape[1]):
+        maxv = np.max(jaccard_matrix[:,idx])
+        max_idx = np.argmax(jaccard_matrix[:,idx])
+        print(f'{max_idx} {maxv}')

@@ -1,7 +1,9 @@
+tmp.txt
 *.ini
 
 logs/
 models/
+figures/
 .ipynb_checkpoints/
 __pycache__/
 corpora/
