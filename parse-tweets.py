@@ -78,6 +78,10 @@ if __name__ == "__main__":
             if i % 10000 == 0:
                 print("{} tweets has processed.".format(str(i)))
 
+            # skip the case which is not with right type
+            if not isinstance(tweet, dict):
+                continue
+
             # 若無法語言 Flag 則跳過
             # this happen in streamline mode
             if "lang" not in tweet.keys():
