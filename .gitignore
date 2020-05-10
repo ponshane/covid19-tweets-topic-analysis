@@ -8,3 +8,4 @@ figures/
 __pycache__/
 corpora/
 .vscode/
+export/
