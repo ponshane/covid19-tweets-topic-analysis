@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# $# is number of input arguments
+if [[ $# -ne 1 ]]; then
+    # $0 is the name of this bash file
+    echo "Usage: $0 Stage"
+    echo "Stage could be prepare-corpus, train-model"
+    exit
+fi
+
+Stage=$1
+echo "Stage -> " $Stage
+
+# general setting
+preDictTag="March+April-Tweets"
+NumTopic=25
+collections_str="FirstWeek_March SecondWeek_March ThirdWeek_March FourthWeek_March FirstWeek_April SecondWeek_April ThirdWeek_April FourthWeek_April"
+# split string into array
+IFS=' ' read -ra collections <<< "$collections_str"
+
+if [ "$Stage" == "prepare-corpus" ]; then
+    for col in "${collections[@]}"
+    do
+        # ${string/substring/replacement}
+        modcol=${col/_/-}
+        python prepare-nmf-corpus.py -c "$col" -f "$modcol"-Tweets-Rolling -pd "$preDictTag"
+    done
+    echo "please run next stage: train-model"
+elif [ "$Stage" == "train-model" ]; then
+    preCol=""
+    for col in "${collections[@]}"
+    do
+        # ${string/substring/replacement}
+        modcol=${col/_/-}
+        # -z to check whether "$preCol" is null
+        if [ -z "$preCol" ]; then
+            python train-nmf-model.py -n "$NumTopic" -f "$modcol"-Tweets-Rolling -pd "$preDictTag"
+            preCol=$modcol
+        else
+            python train-nmf-model.py -n "$NumTopic" -f "$modcol"-Tweets-Rolling -pf "$preCol"-Tweets-Rolling
+            preCol=$modcol
+        fi
+    done
+    echo "please run next stage: inference-dtm"
+elif [ "$Stage" == "inference-dtm" ]; then
+    for col in "${collections[@]}"
+    do
+        # ${string/substring/replacement}
+        modcol=${col/_/-}
+        python inference-nmf-dtm.py -n "$NumTopic" -f "$modcol"-Tweets-Rolling
+    done
+    echo "please run next stage: export-summary"
+elif [ "$Stage" == "export-summary" ]; then
+    for col in "${collections[@]}"
+    do
+        # ${string/substring/replacement}
+        modcol=${col/_/-}
+        python export-nmf-model-summary.py -n "$NumTopic" -f "$modcol"-Tweets-Rolling
+    done
+fi
