@@ -1,8 +1,11 @@
 import time
 import os.path
 import configparser
+from collections import namedtuple
 
 from pymongo import MongoClient
+
+RawTweet = namedtuple("rawTweet", ["id_str", "created_at", "tokens_str"])
 
 class Timer():
     def __init__(self):
@@ -73,3 +76,21 @@ class DocumentStream(object):
     # O(1) in memory
     def __len__(self):
         return sum(1 for e in self.__iter__())
+
+class TweetRawCorpusStream(object):
+    def __init__(self, file_path):
+        self.file_path = file_path
+    
+    def __iter__(self):
+        with open(self.file_path, "r") as rf:
+            for i, line in enumerate(rf):
+                # skip header
+                if i == 0:
+                    continue
+
+                try:
+                    a_tweet = RawTweet._make(line.strip().split("\t"))
+                    yield a_tweet
+                except TypeError:
+                    # this is the case which has empty tokens
+                    continue
