@@ -4,7 +4,7 @@
 if [[ $# -ne 1 ]]; then
     # $0 is the name of this bash file
     echo "Usage: $0 Stage"
-    echo "Stage could be prepare-corpus, train-model"
+    echo "Stage could be scan-vocab, prepare-corpus, train-model, inference-dtm, export-summary, calculate-jac-diff"
     exit
 fi
 
@@ -18,7 +18,11 @@ collections_str="FirstWeek_March SecondWeek_March ThirdWeek_March FourthWeek_Mar
 # split string into array
 IFS=' ' read -ra collections <<< "$collections_str"
 
-if [ "$Stage" == "prepare-corpus" ]; then
+if [ "$Stage" == "scan-vocab" ]; then
+    cstr="${collections[@]}"
+    python scan-whole-vocabs.py -c "$cstr" -f "$preDictTag"
+    echo "please run next stage: prepare-corpus"
+elif [ "$Stage" == "prepare-corpus" ]; then
     for col in "${collections[@]}"
     do
         # ${string/substring/replacement}
@@ -55,6 +59,14 @@ elif [ "$Stage" == "export-summary" ]; then
     do
         # ${string/substring/replacement}
         modcol=${col/_/-}
-        python export-nmf-model-summary.py -n "$NumTopic" -f "$modcol"-Tweets-Rolling
+        # for saving time, use -idtm 0 to skip inferencing dtm
+        python export-nmf-model-summary.py -n "$NumTopic" -f "$modcol"-Tweets-Rolling -idtm 0
     done
+elif [ "$Stage" == "calculate-jac-diff" ]; then
+    cstr="${collections[@]}"
+    modcollections=${cstr//_/-}
+    symb="'"
+    suffix="-Tweets-Rolling-"$NumTopic"topics-summary.csv"
+    echo "python calculate-jaccard-index-between-models.py -tl "$modcollections" -s="$symb$suffix$symb" > tmp.txt"
+    echo "Please copy above line and run it by yourself."
 fi
