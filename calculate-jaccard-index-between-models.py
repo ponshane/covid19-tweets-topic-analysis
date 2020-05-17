@@ -1,10 +1,11 @@
 import argparse
 
+import numpy as np
 import pandas as pd
 import seaborn as sns; sns.set(rc={'figure.figsize':(10,10)})
 import matplotlib.pyplot as plt
 
-from codebase.topic_utilities import calculate_jaccard_matrix_between_models, pick_similar_topic_from_past
+from codebase.topic_utilities import calculate_jaccard_matrix_between_models
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -36,5 +37,11 @@ if __name__ == "__main__":
         print("*"*20)
         print(f"PNG is saved in {png_path}")
         # print indicator
-        pick_similar_topic_from_past(jaccardMatrix)
+        # pick_similar_topic_from_past(jaccardMatrix)
+        print("topic_id,pre Topic,evolution score,topic label,relevant words")
+        for idx in range(jaccardMatrix.shape[1]):
+            maxv = np.max(jaccardMatrix[:,idx])
+            max_idx = np.argmax(jaccardMatrix[:,idx])
+            rel_words = m2_ws[idx]
+            print(f'{idx},{max_idx},{maxv},,{rel_words}')
         print("*"*20)
