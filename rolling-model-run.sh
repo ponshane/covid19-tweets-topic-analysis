@@ -59,7 +59,7 @@ elif [ "$Stage" == "export-summary" ]; then
     do
         # ${string/substring/replacement}
         modcol=${col/_/-}
-        # for saving time, use -idtm 0 to skip inferencing dtm
+        # for saving time, use -idtm 0 to skip calculating topic ratio
         python export-nmf-model-summary.py -n "$NumTopic" -f "$modcol"-Tweets-Rolling -idtm 0
     done
 elif [ "$Stage" == "calculate-jac-diff" ]; then
