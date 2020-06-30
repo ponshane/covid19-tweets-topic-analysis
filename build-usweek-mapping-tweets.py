@@ -26,23 +26,14 @@ def make_time_query(start, end):
 if __name__ == "__main__":
 
     week_bounds = dict()
-    week_bounds["FirstWeek_March"] = {"start":"2020-03-01 00:00:00.000000",
-                                  "end":"2020-03-07 23:59:59.000000"}
-    week_bounds["SecondWeek_March"] = {"start":"2020-03-08 00:00:00.000000",
-                                    "end":"2020-03-14 23:59:59.000000"}
-    week_bounds["ThirdWeek_March"] = {"start":"2020-03-15 00:00:00.000000",
-                                    "end":"2020-03-21 23:59:59.000000"}
-    week_bounds["FourthWeek_March"] = {"start":"2020-03-22 00:00:00.000000",
-                                    "end":"2020-03-28 23:59:59.000000"}
-    week_bounds["FirstWeek_April"] = {"start":"2020-03-29 00:00:00.000000",
-                                    "end":"2020-04-04 23:59:59.000000"}
-    week_bounds["SecondWeek_April"] = {"start":"2020-04-05 00:00:00.000000",
-                                    "end":"2020-04-11 23:59:59.000000"}
-    week_bounds["ThirdWeek_April"] = {"start":"2020-04-12 00:00:00.000000",
-                                    "end":"2020-04-18 23:59:59.000000"}
-    week_bounds["FourthWeek_April"] = {"start":"2020-04-19 00:00:00.000000",
-                                    "end":"2020-04-25 23:59:59.000000"}
-
+    with open("./week-time-mapping.csv", "r") as rf:
+        for i, each_entry in enumerate(rf):
+            # skip the header
+            if i == 0:
+                continue
+            week,start,end = each_entry.strip().split(",")
+            week_bounds[week] = {"start":start, "end":end}
+    
     conn = MongoConnector("./config.ini")
     collections = list(week_bounds.keys())
 
@@ -67,7 +58,7 @@ if __name__ == "__main__":
                 wf.write(f"{id_str}\t{created_at}\t{tokens}\n")
                 sizeCorpus +=1
             cursor.close()
-            print(f"\tScanned {collection} with {sizeCorpus} tweets.")
+            # print(f"\tScanned {collection} with {sizeCorpus} tweets.")
             sizeOfWeek += sizeCorpus
         wf.close()
         print(f"{week} with {sizeOfWeek} tweets in total.")
