@@ -12,15 +12,15 @@ Stage=$1
 echo "Stage -> " $Stage
 
 # general setting
-preDictTag="March+April-Tweets"
+preDictTag="Mar2Jun-Tweets"
 NumTopic=25
-collections_str="FirstWeek_March SecondWeek_March ThirdWeek_March FourthWeek_March FirstWeek_April SecondWeek_April ThirdWeek_April FourthWeek_April"
+collections_str="Week10 Week11 Week12 Week13 Week14 Week15 Week16 Week17 Week18 Week19 Week20 Week21 Week22 Week23 Week24 Week25 Week26"
 # split string into array
 IFS=' ' read -ra collections <<< "$collections_str"
 
 if [ "$Stage" == "scan-vocab" ]; then
     cstr="${collections[@]}"
-    python scan-whole-vocabs.py -c "$cstr" -f "$preDictTag"
+    python scan-whole-vocabs.py -c $cstr -f $preDictTag
     echo "please run next stage: prepare-corpus"
 elif [ "$Stage" == "prepare-corpus" ]; then
     for col in "${collections[@]}"

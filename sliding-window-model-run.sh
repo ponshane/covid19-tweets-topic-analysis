@@ -13,8 +13,8 @@ echo "Stage -> " $Stage
 
 # general setting
 NumTopic=25
-collections=(FirstWeek_March FirstWeek_March,SecondWeek_March SecondWeek_March SecondWeek_March,ThirdWeek_March ThirdWeek_March ThirdWeek_March,FourthWeek_March FourthWeek_March FourthWeek_March,FirstWeek_April FirstWeek_April FirstWeek_April,SecondWeek_April SecondWeek_April SecondWeek_April,ThirdWeek_April ThirdWeek_April ThirdWeek_April,FourthWeek_April FourthWeek_April)
-abbrs=(W1-March W1W2-March W2-March W2W3-March W3-March W3W4-March W4-March W4MarW1Apr W1-April W1W2-April W2-April W2W3-April W3-April W3W4-April W4-April)
+collections=(Week10,Week11 Week11,Week12 Week12,Week13 Week13,Week14 Week14,Week15 Week15,Week16 Week16,Week17 Week17,Week18 Week18,Week19 Week19,Week20 Week20,Week21 Week21,Week22 Week22,Week23 Week23,Week24 Week24,Week25 Week25,Week26)
+abbrs=(W10W11 W11W12 W12W13 W13W14 W14W15 W15W16 W16W17 W17W18 W18W19 W19W20 W20W21 W21W22 W22W23 W23W24 W24W25 W25W26)
 
 if [ "$Stage" == "prepare-corpus" ]; then
 # ${#collections[*]} is the size of collections
