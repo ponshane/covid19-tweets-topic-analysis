@@ -13,9 +13,10 @@ def make_text_query(keyword):
 
 if __name__ == "__main__":
     conn = MongoConnector("./config.ini")
-    
-    keywords = ["Old people", "Elderly", "Ageism", "Ageist", "Older adults", "Grumpy old people"]
-    Weeks = ["FirstWeek_March", "SecondWeek_March", "ThirdWeek_March", "FourthWeek_March", "FirstWeek_April", "SecondWeek_April", "ThirdWeek_April", "FourthWeek_April"]
+    keywords = ["older adult", "old people", "elderly", "ageism", "ageist"]
+    Weeks = ["Week10", "Week11", "Week12", "Week13", "Week14", "Week15",\
+        "Week16", "Week17", "Week18", "Week19", "Week20", "Week21", "Week22", "Week23",\
+            "Week24", "Week25", "Week26", "Week27"]
     
 #     num_count = dict()
 #     for keyword in keywords:
@@ -35,7 +36,7 @@ if __name__ == "__main__":
         num_count[keyword] = 0
         flag = keyword.replace(" ", "-")
         wf = open(f"export/{flag}-tweets.tsv", "w")
-        wf.write("No\tCreated_at\tText\n")
+        wf.write("No\tId\tCreated_at\tText\n")
         for each_week in Weeks:
             conn.get_collection_cursor(each_week)
             docs = conn.target_collection.find(make_text_query(keyword),\
@@ -45,8 +46,9 @@ if __name__ == "__main__":
                     print(f"{keyword}@{each_week}: {i}")
                 num_count[keyword] += 1
                 created_at = doc["created_at"]
+                id_str = doc["id_str"]
                 text = doc["text"].replace("\n", " ")
-                wf.write(f"{i}\t{created_at}\t{text}\n")
+                wf.write(f"{i}\t{id_str}\t{created_at}\t{text}\n")
 
         wf.close()
         docs.close()
