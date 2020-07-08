@@ -45,14 +45,15 @@ elif [ "$Stage" == "train-model" ]; then
             preCol=$modcol
         fi
     done
-    echo "please run next stage: inference-dtm"
+    echo "please run next stage: (1) inference-dtm (optional), (2) export-summary"
 elif [ "$Stage" == "inference-dtm" ]; then
     for col in "${collections[@]}"
     do
         # ${string/substring/replacement}
         modcol=${col/_/-}
-        python inference-nmf-dtm.py -n "$NumTopic" -f "$modcol"-Tweets-Rolling
+        echo "python inference-nmf-dtm.py -n "$NumTopic" -f "$modcol"-Tweets-Rolling"
     done
+    echo "please run above commands simultaneously."
     echo "please run next stage: export-summary"
 elif [ "$Stage" == "export-summary" ]; then
     for col in "${collections[@]}"
@@ -60,7 +61,7 @@ elif [ "$Stage" == "export-summary" ]; then
         # ${string/substring/replacement}
         modcol=${col/_/-}
         # for saving time, use -idtm 0 to skip calculating topic ratio
-        python export-nmf-model-summary.py -n "$NumTopic" -f "$modcol"-Tweets-Rolling -idtm 0
+        python export-nmf-model-summary.py -n "$NumTopic" -f "$modcol"-Tweets-Rolling -idtm 1
     done
 elif [ "$Stage" == "calculate-jac-diff" ]; then
     cstr="${collections[@]}"
