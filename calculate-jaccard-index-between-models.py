@@ -38,10 +38,22 @@ if __name__ == "__main__":
         print(f"PNG is saved in {png_path}")
         # print indicator
         # pick_similar_topic_from_past(jaccardMatrix)
-        print("topic_id,pre Topic,evolution score,topic label,relevant words")
-        for idx in range(jaccardMatrix.shape[1]):
-            maxv = np.max(jaccardMatrix[:,idx])
-            max_idx = np.argmax(jaccardMatrix[:,idx])
-            rel_words = m2_ws[idx]
-            print(f'{idx},{max_idx},{maxv},,{rel_words}')
+        # if there is not topic_ratio (i.e., skip inference-dtm step)
+        if "topic_ratio" not in m2.columns:
+            print("topic_id,pre Topic,evolution score,topic label,relevant words")
+            for idx in range(jaccardMatrix.shape[1]):
+                maxv = np.max(jaccardMatrix[:,idx])
+                max_idx = np.argmax(jaccardMatrix[:,idx])
+                rel_words = m2_ws[idx]
+                print(f'{idx},{max_idx},{maxv},,{rel_words}')
+        # if there has topic_ratio, then topic_ratio should be reported
+        else:
+            m2_ratios = m2.topic_ratio.to_dict()
+            print("topic_id,ratio,pre Topic,evolution score,topic label,relevant words")
+            for idx in range(jaccardMatrix.shape[1]):
+                maxv = np.max(jaccardMatrix[:,idx])
+                max_idx = np.argmax(jaccardMatrix[:,idx])
+                rel_words = m2_ws[idx]
+                ratio = m2_ratios[idx]
+                print(f'{idx},{ratio},{max_idx},{maxv},,{rel_words}')
         print("*"*20)
