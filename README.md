@@ -8,14 +8,14 @@
 3. I will share the id list of these tweets ASAP. If you are interested in analyzing these tweets, you can use [statuses/lookup api](https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/get-statuses-lookup) to pull the contents back and preprocess by the similar strategy implemented in `retrieve-details-of-tweets.py`.
 
 # Procedure for Topic Analysis
-Train the topic model using onlineNMF (Zhao & Tan, 2016)
-- I use online matrix factorization approach 
-    - onlineNMF to learn topic patterns because of three reasons:
-        - The large corpus (~ tens of milions of tweets) slows down the sampling process of Latent Dirichlet Allocation (LDA).
-        - Recent empirical study (Chen et al., 2019) shows the short text characteristic of tweet breaks the assumption of LDA, which assumes each document consist of multiple topics.
-        - Gensim, a well-implemented python toolkit, has implemented [onlineNMF with several helper functions](https://radimrehurek.com/gensim/models/nmf.html) to explore the resultant topic model.
+Train the topic model using onlineNMF 
+- Learn topic patterns using nmf scheme because of three reasons:
+    - The large corpus (~ tens of milions of tweets) slows down the sampling process of Latent Dirichlet Allocation (LDA).
+    - Recent empirical study (Chen et al., 2019) shows the short text characteristic of tweet breaks the assumption of LDA, which assumes each document consist of multiple topics.
+    - Gensim, a well-implemented python toolkit, has implemented [onlineNMF with several helper functions](https://radimrehurek.com/gensim/models/nmf.html) to explore the resultant topic model.
 
-The **build-usweek-mapping-tweets.py** is used for exporting tweets sorted in the us-week order.
+## Data Preparation
+The **build-usweek-mapping-tweets.py** is used for exporting tweets sorted in the us-week order, which starts a week from Sunday.
 
 ## Model 1, Rolling-based NMF
 Run as ```bash rolling-model-run.sh Stage```
@@ -30,6 +30,8 @@ Run as ```bash sliding-window-model-run.sh Stage```
 
 	Stage: prepare-corpus, train-model, inference-dtm, export-summary, calculate-jac-diff
 
+## Subsequent Analysis
+Use `export-representative-tweets.py` for exporting representative topical tweets of each week
+
 # Reference
-- Zhao, R., & Tan, V. Y. (2016). Online nonnegative matrix factorization with outliers. IEEE Transactions on Signal Processing, 65(3), 555-570.
 - Chen, Y., Zhang, H., Liu, R., Ye, Z., & Lin, J. (2019). Experimental explorations on short text topic mining between LDA and NMF based Schemes. Knowledge-Based Systems, 163, 1-13.
