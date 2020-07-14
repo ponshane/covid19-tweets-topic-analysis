@@ -94,3 +94,22 @@ class TweetRawCorpusStream(object):
                 except TypeError:
                     # this is the case which has empty tokens
                     continue
+
+class MultipleTweetCorporaBOWStream(object):
+    def __init__(self, files, dictionary):
+        """ This is a class to prepare a corpus (iterable of list of (wordid, count))
+        for gensim.matutils.MmWriter.write_corpus
+
+        files (list of str), each for a filepath of a tweet raw corpus
+        dictionary (gensim.corpora.Dictionary)
+        """
+        self.files = files
+        self.dictionary = dictionary
+    
+    def __iter__(self):
+        for file in self.files:
+            print(f"Entering {file}.")
+            for _, a_tweet in enumerate(TweetRawCorpusStream(file)):
+                bow_per_doc = self.dictionary.doc2bow(a_tweet.tokens_str.split(","))
+                if len(bow_per_doc) > 4:
+                    yield bow_per_doc
