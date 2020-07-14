@@ -10,15 +10,17 @@ if __name__ == "__main__":
     model_path = "./models/"
 
     # Variables
-    week_stop = 18 # the end of the week loop
+    week_start = 18 # the start of the week loop
+    week_stop = 27 # the end of the week loop
     topic_num = 25
     top_n_tweets = 20
 
-    # export representative topical tweets from rolling model 
+    # # export representative topical tweets from rolling model
+
     # wf = open("./representative-tweets-rolling-model.csv", "w")
     # wf.write("Week,Topic,Tweet_ID,Topic%\n")
     # # loop for each week
-    # for week_index in range(10, week_stop):   
+    # for week_index in range(week_start, week_stop):   
     #     # load meta dataframe 
     #     fileTag = f"Week{week_index}-Tweets-Rolling"
     #     meta = pd.read_csv("{}{}-Meta.csv".format(corpora_path, fileTag))
@@ -38,11 +40,13 @@ if __name__ == "__main__":
     #             wf.write(f"Week{week_index},{topic_index},{id_str},{topic_ratio}\n")
     # wf.close()
 
+    # export representative topical tweets from sliding model
+
     wf = open("./representative-tweets-sliding-model.csv", "w")
     wf.write("Week,Topic,Tweet_ID,Topic%\n")
 
-    Week_set = ["W10", "W10W11", "W11W12", "W12W13", "W13W14", "W14W15",\
-        "W15W16", "W16W17"]
+    Week_set = ["W17W18", "W18W19", "W19W20", "W20W21", "W21W22", "W22W23",\
+        "W23W24", "W24W25", "W25W26"]
 
     # loop for each week
     for week in Week_set:
