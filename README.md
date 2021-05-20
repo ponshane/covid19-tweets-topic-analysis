@@ -1,5 +1,3 @@
-> This is an ongoing project. Codes may be changed significantly from time to time.
-
 # Data Acquisition & Preprocessing
 1. I use [streaming API of Twitter](https://developer.twitter.com/en/docs/tweets/filter-realtime/overview) to collect tweets containing keywords "covid19" or "#covid19". And, I monitor this stream from first week of March.
 2. To avoid from considering the duplicated contents, e.g., retweets, quote tweet, I use `parse-tweets.py` to filter out those tweets. `retrieve-details-of-tweets.py` is then used to retrieve details of each tweet by [statuses/lookup api](https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/get-statuses-lookup) because I find texts of tweets returned by streaming API are truncated...
@@ -32,6 +30,13 @@ Run as ```bash sliding-window-model-run.sh Stage```
 
 ## Subsequent Analysis
 Use `export-representative-tweets.py` for exporting representative topical tweets of each week
+
+# Case: Vaccine-related Tweets Analysis
+1. `format-vaccine-tweets.py` helps format the corpus
+2. `rolling-model-run.sh` has changed for accepting the vaccine tweet corpora
+3. `export-nmf-model-summary-wo-rerank.py` is used for reporting the most contributed word of each topic and topic evolution
+4. `inference-onemodel-dtm[1-4].py` is used for inferencing topic distribution of each document. Each py file is responsible for every two weeks data for parallel processing
+5. `export-vaccine-representative-topics.py` is used for exporting representative tweets of each topic
 
 # Reference
 - Chen, Y., Zhang, H., Liu, R., Ye, Z., & Lin, J. (2019). Experimental explorations on short text topic mining between LDA and NMF based Schemes. Knowledge-Based Systems, 163, 1-13.

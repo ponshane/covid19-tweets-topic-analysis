@@ -12,9 +12,9 @@ Stage=$1
 echo "Stage -> " $Stage
 
 # general setting
-preDictTag="Mar2Jun-Tweets"
-NumTopic=25
-collections_str="Week10 Week11 Week12 Week13 Week14 Week15 Week16 Week17 Week18 Week19 Week20 Week21 Week22 Week23 Week24 Week25 Week26"
+preDictTag="TwoMonths-BiWeeks-VaccineTweets"
+NumTopic=50
+collections_str="First-and-SecondWeek Third-and-FourthWeek Fifth-and-SixthWeek Seventh-and-EighthWeek"
 # split string into array
 IFS=' ' read -ra collections <<< "$collections_str"
 
@@ -61,7 +61,7 @@ elif [ "$Stage" == "export-summary" ]; then
         # ${string/substring/replacement}
         modcol=${col/_/-}
         # for saving time, use -idtm 0 to skip calculating topic ratio
-        python export-nmf-model-summary.py -n "$NumTopic" -f "$modcol"-Tweets-Rolling -idtm 1
+        python export-nmf-model-summary.py -n "$NumTopic" -f "$modcol"-Tweets-Rolling -idtm 0
     done
 elif [ "$Stage" == "calculate-jac-diff" ]; then
     cstr="${collections[@]}"
