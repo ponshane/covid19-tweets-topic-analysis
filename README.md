@@ -32,11 +32,20 @@ Run as ```bash sliding-window-model-run.sh Stage```
 Use `export-representative-tweets.py` for exporting representative topical tweets of each week
 
 # Case: Vaccine-related Tweets Analysis
+
+## Learning model & inference
 1. `format-vaccine-tweets.py` helps format the corpus
 2. `rolling-model-run.sh` has changed for accepting the vaccine tweet corpora
 3. `export-nmf-model-summary-wo-rerank.py` is used for reporting the most contributed word of each topic and topic evolution
 4. `inference-onemodel-dtm[1-4].py` is used for inferencing topic distribution of each document. Each py file is responsible for every two weeks data for parallel processing
-5. `export-vaccine-representative-topics.py` is used for exporting representative tweets of each topic
+5. `export-representative-tweets-of-vaccine-topics.py` is used for exporting representative tweets of each topic
+
+## Visualization
+1. `select-distinct-tweets.py` helps identify distinct tweets in corpora, which are used for sentiment analysis & topic visualization
+2. `notebook/create_dated_topic_frame.ipynb` combines the topic distribution of each document with its data information
+3. `notebook/drawing-topic-trend.ipynb` draws the topic trend of each topic
+    - `notebook/find-dated-representative-tweets.ipynb` helps identify representative tweets for a specific topic on a given day
+    - `notebook/print-topics.ipynb` explores the most contributed words of each topic
 
 # Reference
 - Chen, Y., Zhang, H., Liu, R., Ye, Z., & Lin, J. (2019). Experimental explorations on short text topic mining between LDA and NMF based Schemes. Knowledge-Based Systems, 163, 1-13.
