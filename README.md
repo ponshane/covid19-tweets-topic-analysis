@@ -1,51 +1,61 @@
-# Data Acquisition & Preprocessing
-1. I use [streaming API of Twitter](https://developer.twitter.com/en/docs/tweets/filter-realtime/overview) to collect tweets containing keywords "covid19" or "#covid19". And, I monitor this stream from first week of March.
-2. To avoid from considering the duplicated contents, e.g., retweets, quote tweet, I use `parse-tweets.py` to filter out those tweets. `retrieve-details-of-tweets.py` is then used to retrieve details of each tweet by [statuses/lookup api](https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/get-statuses-lookup) because I find texts of tweets returned by streaming API are truncated...
-    - Note that `retrieve-details-of-tweets.py` also help do text preprocessing 
-    - I use mongodb to store every tweet with its meta information and NLP results.
-3. I will share the id list of these tweets ASAP. If you are interested in analyzing these tweets, you can use [statuses/lookup api](https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/get-statuses-lookup) to pull the contents back and preprocess by the similar strategy implemented in `retrieve-details-of-tweets.py`.
+# Documentation
+The following steps are used for replicating the research paper:
+Detecting Topics and Sentiments of Public Concerns on COVID-19 Vaccines with Social Media Trend Analysis
+## Step1, Download Tweets
 
-# Procedure for Topic Analysis
-Train the topic model using onlineNMF 
-- Learn topic patterns using nmf scheme because of three reasons:
-    - The large corpus (~ tens of milions of tweets) slows down the sampling process of Latent Dirichlet Allocation (LDA).
-    - Recent empirical study (Chen et al., 2019) shows the short text characteristic of tweet breaks the assumption of LDA, which assumes each document consist of multiple topics.
-    - Gensim, a well-implemented python toolkit, has implemented [onlineNMF with several helper functions](https://radimrehurek.com/gensim/models/nmf.html) to explore the resultant topic model.
+We use the open accessed data, [CORONAVIRUS (COVID-19) TWEETS DATASET](https://ieee-dataport.org/open-access/coronavirus-covid-19-tweets-dataset), that can be downloaded from IEEE DataPort. For using the same tweets as the paper used, please download `corona_tweets_[273-332].zip` from the dataset's website. Those zip files should contain the Covid-19 related tweets from 2020-12-16 ~ 2021-02-13. All zip files are then unzipped and stored in a data folder (e.g., ~/DATA_PATH/[273-332]). 
 
-## Data Preparation
-The **build-usweek-mapping-tweets.py** is used for exporting tweets sorted in the us-week order, which starts a week from Sunday.
+For following the Twitter's Policy, we can only get tweet ids from the open accessed dataset. One needs to retrieve the metadata using Twitter's [lookup API](https://developer.twitter.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-statuses-lookup). `notebook/lookup-metadata.ipynb` is the notebook we used for retrieving the metadata of tweets (also called hydrate). After having the metadata of tweets, we then use `notebook/filter-tweets.ipynb` to perform keyword matching and retain the vaccine-related tweets.
 
-## Model 1, Rolling-based NMF
-Run as ```bash rolling-model-run.sh Stage```
+## Step2, Train Model & inference
+1. `format-vaccine-tweets.py` helps format the corpus that are stored in ~/DATA_PATH/[273-332]:
+    ```python
+    # note that all formatted outputs are put in ./corpora/
+    # 2020-12-16 ~ 2020-12-30
+    python format-vaccine-tweets.py -fs 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 \
+    -op ./corpora \
+    -on First-and-SecondWeek
+    # 2020-12-31 ~ 2021-01-14
+    python format-vaccine-tweets.py -fs 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 \
+    -op ./corpora \
+    -on Third-and-FourthWeek
+    # 2021-01-15 ~ 2021-01-29
+    python format-vaccine-tweets.py -fs 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 \
+    -op ./corpora \
+    -on Fifth-and-SixthWeek
+    # 2021-01-30 ~ 2021-02-13
+    python format-vaccine-tweets.py -fs 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 \
+    -op ./corpora \
+    -on Seventh-and-EighthWeek
+    ```
+2. `rolling-model-run.sh` prepares the tweets and train the rolling-nmf model:
+    ```bash
+    # please run the following commands sequentially
+    # 1) scan vocabulary 
+    # the outputs would be stored in ./corpora/
+    bash rolling-model-run.sh scan-vocab
+    
+    # 2) transform the corpus into requried format
+    # the outputs would be stored in ./corpora/ and ./models/
+    bash rolling-model-run.sh prepare-corpus
+    
+    # 3) train the rolling-nmf model
+    # the resultant models are saved in ./models/
+    bash rolling-model-run.sh train-model
+    ```
+3. `inference-onemodel-dtm[1-4].py` is used for inferencing topic distribution of each document. Each py file is responsible for every two weeks data:
+    ```bash
+    # note that each py would only use 1 thread, so one can run them in parallel for better efficientcy
+    # the resultant dtm (document topic matrix) would be stored in ./models/
+    python inference-onemodel-dtm1.py
+    python inference-onemodel-dtm2.py
+    python inference-onemodel-dtm3.py
+    python inference-onemodel-dtm4.py
+    ```
 
-    Stage: scan-vocab, prepare-corpus, train-model, inference-dtm, export-summary, calculate-jac-diff
-
-Only need to revise the general information in script.
-The required data and logics should be self-explaned in bash script.
-
-## Model 2, Sliding-based NMF
-Run as ```bash sliding-window-model-run.sh Stage```
-
-	Stage: prepare-corpus, train-model, inference-dtm, export-summary, calculate-jac-diff
-
-## Subsequent Analysis
-Use `export-representative-tweets.py` for exporting representative topical tweets of each week
-
-# Case: Vaccine-related Tweets Analysis
-
-## Learning model & inference
-1. `format-vaccine-tweets.py` helps format the corpus
-2. `rolling-model-run.sh` has changed for accepting the vaccine tweet corpora
-3. `export-nmf-model-summary-wo-rerank.py` is used for reporting the most contributed word of each topic and topic evolution
-4. `inference-onemodel-dtm[1-4].py` is used for inferencing topic distribution of each document. Each py file is responsible for every two weeks data for parallel processing
-5. `export-representative-tweets-of-vaccine-topics.py` is used for exporting representative tweets of each topic
-
-## Visualization
+## Step3, Visualization & Exploration
 1. `select-distinct-tweets.py` helps identify distinct tweets in corpora, which are used for sentiment analysis & topic visualization
 2. `notebook/create_dated_topic_frame.ipynb` combines the topic distribution of each document with its data information
-3. `notebook/drawing-topic-trend.ipynb` draws the topic trend of each topic
+    - `notebook/drawing-topic-trend.ipynb` draws the topic trend of each topic
     - `notebook/find-dated-representative-tweets.ipynb` helps identify representative tweets for a specific topic on a given day
     - `notebook/print-topics.ipynb` explores the most contributed words of each topic
-
-# Reference
-- Chen, Y., Zhang, H., Liu, R., Ye, Z., & Lin, J. (2019). Experimental explorations on short text topic mining between LDA and NMF based Schemes. Knowledge-Based Systems, 163, 1-13.
